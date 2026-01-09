@@ -15,6 +15,7 @@ sql`SELECT 1`.then(() => {
 const servicesRoutes = require('./routes/services');
 const bookingsRoutes = require('./routes/bookings');
 const availabilityRoutes = require('./routes/availability');
+const adminRoutes = require('./routes/admin');
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
@@ -27,7 +28,8 @@ app.get('/', (req, res) => {
 // Mount routes
 app.use('/api/services', servicesRoutes);
 app.use('/api/bookings', bookingsRoutes);
-app.use('api/availability', availabilityRoutes);
+app.use('/api/availability', availabilityRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Start Server
 app.listen(port, () => {

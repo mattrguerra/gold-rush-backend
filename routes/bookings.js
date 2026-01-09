@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('../db');
+const authenticateToken = require('../middleware/auth');
+const { sendBookingConfirmation, sendAdminNotification } = require('../services/email');
 
 // GET /api/bookings (list all)
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
     try {
         const bookings = await sql`
             SELECT b.*, c.name as customer_name, c.email, s.name as service_name
@@ -24,7 +26,7 @@ router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const [booking] = await sql`
-            SELECT b.*, c,name as customer_name, c.email, c.phone, s.name as service_name
+            SELECT b.*, c.name as customer_name, c.email, c.phone, s.name as service_name
             FROM bookings b
             LEFT JOIN customers c ON b.customer_id = c.id
             LEFT JOIN services s ON b.service_id = s.id
@@ -44,6 +46,27 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { name, email, phone, address, service_id, vehicle_type, scheduled_date, scheduled_time, notes } = req.body;
+
+        // Check if slot is available
+        const [existingBooking] = await sql`
+            SELECT id FROM bookings
+            WHERE scheduled_date = ${scheduled_date}
+            AND scheduled_time = ${scheduled_time}
+            AND status != 'cancelled'
+        `;
+
+        if (existingBooking) {
+            return res.status(400).json({ error: 'This time slot is already booked' });
+        }
+
+        // Check if date is blocked
+        const [availability] = await sql`
+            SELECT blocked FROM availability WHERE date = ${scheduled_date}
+        `;
+
+        if (availability?.blocked) {
+            return res.status(400).json({ error: 'This date is not available for booking' });
+        }
 
         // Create or find customer
         let [customer] = await sql`
@@ -71,6 +94,10 @@ router.post('/', async (req, res) => {
             RETURNING *
         `;
 
+        // Send confirmation emails (non-blocking)
+        sendBookingConfirmation(booking, customer, service);
+        sendAdminNotification(booking, customer, service);
+
         res.status(201).json({
             message: 'Booking created',
             booking,
@@ -83,7 +110,7 @@ router.post('/', async (req, res) => {
 });
 
 // PATCH /api/bookings/:id (update status)
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
@@ -107,7 +134,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // DELETE /api/bookings/:id
-router.delete('/id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
 
