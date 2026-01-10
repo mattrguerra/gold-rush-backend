@@ -4,7 +4,7 @@ const sql = require('./db');
 const cors = require('cors');
 const app = express()
 app.use(cors());
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Test database connection
 sql`SELECT 1`.then(() => {
