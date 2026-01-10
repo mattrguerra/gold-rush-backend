@@ -1,7 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const sql = require('./db');
+const cors = require('cors');
 const app = express()
+app.use(cors());
 const port = 3000;
 
 // Test database connection
