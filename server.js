@@ -3,6 +3,8 @@ const express = require('express');
 const sql = require('./db');
 const cors = require('cors');
 const app = express()
+const contactRoutes = require('./routes/contact');
+app.use('/api/contact', contactRoutes);
 app.use(cors());
 const port = process.env.PORT || 3000;
 
