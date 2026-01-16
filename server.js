@@ -2,11 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const sql = require('./db');
 const cors = require('cors');
-const app = express()
-const contactRoutes = require('./routes/contact');
-app.use('/api/contact', contactRoutes);
-app.use(cors());
+const app = express();
 const port = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
 
 // Test database connection
 sql`SELECT 1`.then(() => {
@@ -20,13 +21,11 @@ const servicesRoutes = require('./routes/services');
 const bookingsRoutes = require('./routes/bookings');
 const availabilityRoutes = require('./routes/availability');
 const adminRoutes = require('./routes/admin');
-
-// Middleware to parse JSON request bodies
-app.use(express.json());
+const contactRoutes = require('./routes/contact');
 
 // Basic health check route
 app.get('/', (req, res) => {
-    res.json({message: 'Gold Rush Detailing API is running' });
+    res.json({ message: 'Gold Rush Detailing API is running' });
 });
 
 // Mount routes
@@ -34,6 +33,7 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/bookings', bookingsRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Start Server
 app.listen(port, '0.0.0.0', () => {
