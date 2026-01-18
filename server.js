@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
 
 // Mount routes
 app.use('/api/services', servicesRoutes);
-app.use('api/addons', addonsRoutes);
+app.use('/api/addons', addonsRoutes);
 app.use('/api/bookings', bookingsRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/admin', adminRoutes);
