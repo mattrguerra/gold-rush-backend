@@ -61,7 +61,7 @@ const sendAdminNotification = async (booking, customer, service) => {
         const sendSmtpEmail = new Brevo.SendSmtpEmail();
         
         sendSmtpEmail.sender = { name: 'Gold Rush Detailing', email: 'noreply@goldrushdetailing.com' };
-        sendSmtpEmail.to = [{ email: 'booking@goldrushdetailing.com' & 'webdev@goldrushdetailing.com', name: 'Gold Rush Bookings' }];
+        sendSmtpEmail.to = [{ email: 'booking@goldrushdetailing.com', name: 'Gold Rush Bookings' }];
         sendSmtpEmail.subject = `New Booking: ${service.name} - ${customer.name}`;
         sendSmtpEmail.htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #ffffff; padding: 40px;">
