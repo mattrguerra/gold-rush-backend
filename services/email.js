@@ -121,8 +121,3 @@ const sendAdminNotification = async (booking, customer, service) => {
 };
 
 module.exports = { sendBookingConfirmation, sendAdminNotification };
-```
-
-**4. Add to Railway environment variables (optional but recommended):**
-```
-ACTION_SECRET=your-random-secret-string-here
