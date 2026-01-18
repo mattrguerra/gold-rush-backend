@@ -20,9 +20,11 @@ sql`SELECT 1`.then(() => {
 const servicesRoutes = require('./routes/services');
 const addonsRoutes = require('./routes/addons');
 const bookingsRoutes = require('./routes/bookings');
+const bookingActionsRoutes = require('./routes/booking-actions');
 const availabilityRoutes = require('./routes/availability');
 const adminRoutes = require('./routes/admin');
 const contactRoutes = require('./routes/contact');
+const calendarRoutes = require('./routes/calendar');
 
 // Basic health check route
 app.get('/', (req, res) => {
@@ -33,11 +35,23 @@ app.get('/', (req, res) => {
 app.use('/api/services', servicesRoutes);
 app.use('/api/addons', addonsRoutes);
 app.use('/api/bookings', bookingsRoutes);
+app.use('/api/booking-actions', bookingActionsRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/calendar', calendarRoutes);
 
 // Start Server
 app.listen(port, '0.0.0.0', () => {
     console.log(`Server running at http://0.0.0.0:${port}`);
 });
+
+// -----------------------------------------------------------------------------
+
+// **Calendar subscription URLs:**
+
+// Once deployed, the calendar can be subscribe to at:
+
+// https://gold-rush-backend-production.up.railway.app/api/calendar/bookings.ics
+
+// -----------------------------------------------------------------------------
