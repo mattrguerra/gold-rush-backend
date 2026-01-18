@@ -1,0 +1,22 @@
+gold-rush-backend
+├── .DS_Store
+├── .env
+├── .gitignore
+├── .nvmrc
+├── db.js
+├── middleware
+│   └── auth.js
+├── package-lock.json
+├── package.json
+├── routes
+│   ├── addons.js
+│   ├── admin.js
+│   ├── availability.js
+│   ├── booking-actions.js
+│   ├── bookings.js
+│   ├── calendar.js
+│   ├── contact.js
+│   └── services.js
+├── server.js
+└── services
+    └── email.js

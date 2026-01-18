@@ -25,6 +25,7 @@ const availabilityRoutes = require('./routes/availability');
 const adminRoutes = require('./routes/admin');
 const contactRoutes = require('./routes/contact');
 const calendarRoutes = require('./routes/calendar');
+const adminAvailabilityRoutes = require('./routes/admin-availability');
 
 // Basic health check route
 app.get('/', (req, res) => {
@@ -40,6 +41,7 @@ app.use('/api/availability', availabilityRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/calendar', calendarRoutes);
+app.use('/api/admin/availability', adminAvailabilityRoutes);
 
 // Start Server
 app.listen(port, '0.0.0.0', () => {

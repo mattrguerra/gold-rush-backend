@@ -8,7 +8,7 @@ const { sendBookingConfirmation, sendAdminNotification } = require('../services/
 router.get('/', authenticateToken, async (req, res) => {
     try {
         const bookings = await sql`
-            SELECT b.*, c.name as customer_name, c.email, s.name as service_name
+            SELECT b.*, c.name as customer_name, c.email, c.phone, s.name as service_name
             FROM bookings b
             LEFT JOIN customers c ON b.customer_id = c.id
             LEFT JOIN services s ON b.service_id = s.id

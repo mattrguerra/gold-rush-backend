@@ -38,4 +38,33 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// GET /api/admin/stats
+router.get('/stats', authenticateToken, async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const weekEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        
+        const bookings = await sql`SELECT * FROM bookings WHERE status != 'cancelled'`;
+        
+        const todayCount = bookings.filter(b => 
+            b.scheduled_date.toISOString().split('T')[0] === today
+        ).length;
+        
+        const pendingCount = bookings.filter(b => b.status === 'pending').length;
+        
+        const weekBookings = bookings.filter(b => {
+            const d = b.scheduled_date.toISOString().split('T')[0];
+            return d >= today && d <= weekEnd;
+        });
+        
+        const weekRevenue = weekBookings.reduce((sum, b) => 
+            sum + parseFloat(b.total_price || 0), 0
+        );
+        
+        res.json({ todayCount, pendingCount, weekCount: weekBookings.length, weekRevenue });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+});
+
 module.exports = router;
