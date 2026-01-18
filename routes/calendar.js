@@ -26,22 +26,55 @@ X-WR-TIMEZONE:America/Chicago
 `;
 
         for (const booking of bookings) {
-            const startDate = new Date(`${booking.scheduled_date}T${booking.scheduled_time}`);
-            const endDate = new Date(startDate.getTime() + (booking.duration_minutes || 60) * 60000);
+            // Handle date parsing safely
+            let dateStr;
+            if (booking.scheduled_date instanceof Date) {
+                dateStr = booking.scheduled_date.toISOString().split('T')[0];
+            } else {
+                dateStr = String(booking.scheduled_date).split('T')[0];
+            }
             
-            const formatDate = (date) => {
-                return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+            // Handle time - ensure it's in HH:MM format
+            let timeStr = booking.scheduled_time || '09:00';
+            if (timeStr.length === 5) {
+                timeStr = timeStr + ':00';
+            }
+            
+            const startDate = new Date(`${dateStr}T${timeStr}`);
+            
+            // Check if date is valid
+            if (isNaN(startDate.getTime())) {
+                console.error(`Invalid date for booking ${booking.id}: ${dateStr} ${timeStr}`);
+                continue;
+            }
+            
+            const duration = booking.duration_minutes || 60;
+            const endDate = new Date(startDate.getTime() + duration * 60000);
+            
+            const formatDateICal = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                return `${year}${month}${day}T${hours}${minutes}${seconds}`;
             };
 
-            const location = booking.address ? booking.address.replace(/,/g, '\\,').replace(/\n/g, '\\n') : '';
-            const description = `Customer: ${booking.customer_name}\\nPhone: ${booking.phone || 'N/A'}\\nVehicle: ${booking.vehicle_type || 'N/A'}\\nPrice: $${booking.total_price}${booking.notes ? '\\nNotes: ' + booking.notes : ''}`.replace(/\n/g, '\\n');
+            const escapeText = (text) => {
+                if (!text) return '';
+                return text.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n');
+            };
+
+            const location = escapeText(booking.address);
+            const description = escapeText(`Customer: ${booking.customer_name}\nPhone: ${booking.phone || 'N/A'}\nVehicle: ${booking.vehicle_type || 'N/A'}\nPrice: $${booking.total_price}${booking.notes ? '\nNotes: ' + booking.notes : ''}`);
 
             ical += `BEGIN:VEVENT
 UID:booking-${booking.id}@goldrushdetailing.com
-DTSTAMP:${formatDate(new Date())}
-DTSTART:${formatDate(startDate)}
-DTEND:${formatDate(endDate)}
-SUMMARY:${booking.service_name} - ${booking.customer_name}
+DTSTAMP:${formatDateICal(new Date())}
+DTSTART:${formatDateICal(startDate)}
+DTEND:${formatDateICal(endDate)}
+SUMMARY:${escapeText(booking.service_name)} - ${escapeText(booking.customer_name)}
 DESCRIPTION:${description}
 LOCATION:${location}
 STATUS:${booking.status === 'confirmed' ? 'CONFIRMED' : 'TENTATIVE'}
@@ -59,7 +92,7 @@ END:VEVENT
 
     } catch (err) {
         console.error('Error generating calendar:', err);
-        res.status(500).json({ error: 'Failed to generate calendar' });
+        res.status(500).send('Failed to generate calendar');
     }
 });
 
